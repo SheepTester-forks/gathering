@@ -28,3 +28,7 @@ After that, add the webring HTML somewhere on your site, like the sidebar or foo
 ```
 
 And that's it!
+
+# Credits
+
+This uses the project [`ringfairy`](https://github.com/k3rs3d/ringfairy). Please go check it out!
