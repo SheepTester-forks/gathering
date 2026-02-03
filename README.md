@@ -31,4 +31,4 @@ And that's it!
 
 # Credits
 
-This uses the project [`ringfairy`](https://github.com/k3rs3d/ringfairy). Please go check it out!
+This project uses [`ringfairy`](https://github.com/k3rs3d/ringfairy). Please go check it out!
