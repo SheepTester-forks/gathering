@@ -1,7 +1,7 @@
 use crate::cli::AppSettings;
 use crate::error::Error;
 use crate::http::download_file;
-use crate::website::Website;
+use crate::website::{Website, WebsitesTomlFormat};
 use std::fs;
 use std::path::Path;
 
@@ -29,9 +29,9 @@ pub async fn parse_website_list(settings: &AppSettings) -> Result<Vec<Website>, 
 
     // TOML literals
     for toml in &settings.toml_lists {
-        let mut list: Vec<Website> = toml::from_str(toml)
+        let parsed: WebsitesTomlFormat = toml::from_str(toml)
             .map_err(|e| Error::StringError(format!("Failed to parse TOML literal: {e}")))?;
-        all_websites.append(&mut list);
+        all_websites.extend(parsed.websites);
     }
 
     // Load file(s)
@@ -41,8 +41,23 @@ pub async fn parse_website_list(settings: &AppSettings) -> Result<Vec<Website>, 
         let mut list = match ext.as_str() {
             "json" => serde_json::from_str::<Vec<Website>>(&file_data)
                 .map_err(|e| Error::StringError(format!("Failed to parse JSON file '{}': {}", path, e)))?,
-            "toml" => toml::from_str::<Vec<Website>>(&file_data)
-                .map_err(|e| Error::StringError(format!("Failed to parse TOML file '{}': {}", path, e)))?,
+            "toml" => {
+                // Preferred TOML format:
+                //   [[websites]]
+                //   name = "..."
+                //   url  = "..."
+                //
+                // Back-compat: also accept a bare Vec<Website> if the user uses an alternate TOML shape.
+                match toml::from_str::<WebsitesTomlFormat>(&file_data) {
+                    Ok(parsed) => parsed.websites,
+                    Err(primary_err) => toml::from_str::<Vec<Website>>(&file_data).map_err(|secondary_err| {
+                        Error::StringError(format!(
+                            "Failed to parse TOML file '{}'. Tried [[websites]] format ({primary_err}) and Vec<Website> format ({secondary_err})",
+                            path
+                        ))
+                    })?,
+                }
+            }
             "csv" => parse_csv_websites(&file_data)
                 .map_err(|e| Error::StringError(format!("Failed to parse CSV file '{}': {}", path, e)))?,
             other => return Err(Error::StringError(format!("Unsupported file format '{}'", other))),

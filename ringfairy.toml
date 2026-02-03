@@ -1,10 +1,10 @@
-base_url = "https://webring.domain.tld"
-ring_name = "Webring"
-ring_description = "A webring to connect member sites."
-ring_owner = "Webring Organization / Person"
-ring_owner_site = "https://domain.tld"
+base_url = "https://kytrinh.me/gathering"
+ring_name = "UCSD Gathering"
+ring_description = "A webring to connect UCSD students."
+ring_owner = "pink10000"
+ring_owner_site = "https://kytrinh.me"
 
-filepath_list = ["./websites.json"]   # Website list; should be a JSON file with 'name', 'url', etc 
+filepath_list = ["./websites.toml"]
 path_output = "./webring"           # Generated files will be saved in this folder.
 path_assets = "./data/assets"       # All contents of the asset folder will be copied directly into the output directory
 path_templates = "./data/templates" # The folder containing HTML templates to use, ie, anything with {{ tags }}

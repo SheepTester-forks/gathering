@@ -46,7 +46,8 @@ impl Default for AppSettings {
             _filepath_config: "./ringfairy.toml".into(),
             json_lists: Vec::new(),
             toml_lists: Vec::new(),
-            filepath_list: vec!["./websites.json".to_string()],
+            // Default website list file (can be overridden by config or -l/--list)
+            filepath_list: vec!["./websites.toml".to_string()],
             filename_template_redirect: "redirect.html".into(),
             path_output: "./webring".into(),
             path_assets: "./data/assets".into(),
@@ -348,7 +349,10 @@ async fn merge_configs(cli_args: ClapSettings, config: self::ConfigSettings) -> 
     if let Some(ref cfg_paths) = config.filepath_list {
         de_dupe.extend(cfg_paths.iter().cloned());
     }
-    final_settings.filepath_list = de_dupe.into_iter().collect();
+    // Preserve default list file if neither CLI nor config provided any.
+    if !de_dupe.is_empty() {
+        final_settings.filepath_list = de_dupe.into_iter().collect();
+    }
 
     final_settings.json_lists = {
         let mut v = Vec::new();
