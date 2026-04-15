@@ -73,3 +73,12 @@ url = "https://scottsemtner.com/"
 atom = "" # optional
 rss = "" # optional
 owner = "Scott Semtner"
+
+[[websites]]
+name = "mojeanmac"
+slug = "mojeanmac"
+about = "molly's site"
+url = "https://macla.ren/"
+atom = "" # optional
+rss = "https://macla.ren/blog/index.xml" # optional
+owner = "molly"
