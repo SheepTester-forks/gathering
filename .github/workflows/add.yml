@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Write to data/comments.yml
-        run: echo '${{ github.event.issue.body }}' >> websites.toml
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: echo "$ISSUE_BODY" >> websites.toml
       - name: Push changes
         run: |
           git config --local user.name 'Github Actions: ${{ github.action }} (for @${{ github.event.sender.login }})'
