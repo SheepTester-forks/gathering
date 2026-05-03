@@ -43,6 +43,7 @@ impl std::hash::Hash for Website {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct WebsitesTomlFormat {
     pub websites: Vec<Website>,
@@ -120,20 +121,33 @@ pub async fn does_html_contain_links(
         scraper::Selector::parse("button").map_err(|e| (website.clone(), e.into()))?;
     let img_selector = scraper::Selector::parse("img").map_err(|e| (website.clone(), e.into()))?;
 
-    let next_link = format!(
-        "{}/{}/{}",
-        settings.base_url.trim_end_matches('/'),
-        website.slug,
-        settings.next_url_text
-    );
-    let prev_link: String = format!(
-        "{}/{}/{}",
-        settings.base_url.trim_end_matches('/'),
-        website.slug,
-        settings.prev_url_text
-    );
+    let mut all_base_urls = vec![settings.base_url.clone()];
+    all_base_urls.extend(settings.base_url_aliases.iter().cloned());
 
-    //log::trace!("Expected next/previous URLs: {}, {}", &next_link, &prev_link);
+    let next_links: Vec<String> = all_base_urls
+        .iter()
+        .map(|url| {
+            format!(
+                "{}/{}/{}",
+                url.trim_end_matches('/'),
+                website.slug,
+                settings.next_url_text
+            )
+        })
+        .collect();
+    let prev_links: Vec<String> = all_base_urls
+        .iter()
+        .map(|url| {
+            format!(
+                "{}/{}/{}",
+                url.trim_end_matches('/'),
+                website.slug,
+                settings.prev_url_text
+            )
+        })
+        .collect();
+
+    //log::trace!("Expected next/previous URLs: {:?}, {:?}", &next_links, &prev_links);
 
     let mut next_exists = false;
     let mut previous_exists = false;
@@ -144,9 +158,9 @@ pub async fn does_html_contain_links(
             log::trace!("Comparing link href: {}", href);
 
             let href_trimmed = href.trim_end_matches('/');
-            if href_trimmed == next_link {
+            if next_links.iter().any(|l| l == href_trimmed) {
                 next_exists = true;
-            } else if href_trimmed == prev_link {
+            } else if prev_links.iter().any(|l| l == href_trimmed) {
                 previous_exists = true;
             }
         }
@@ -157,9 +171,9 @@ pub async fn does_html_contain_links(
         for element in document.select(&button_selector) {
             if let Some(onclick) = element.value().attr("onclick") {
                 log::trace!("Checking button onclick: {}", onclick);
-                if onclick.contains(&next_link) {
+                if next_links.iter().any(|l| onclick.contains(l)) {
                     next_exists = true;
-                } else if onclick.contains(&prev_link) {
+                } else if prev_links.iter().any(|l| onclick.contains(l)) {
                     previous_exists = true;
                 }
             }
@@ -171,9 +185,9 @@ pub async fn does_html_contain_links(
         for element in document.select(&img_selector) {
             if let Some(onclick) = element.value().attr("onclick") {
                 log::trace!("Checking img onclick: {}", onclick);
-                if onclick.contains(&next_link) {
+                if next_links.iter().any(|l| onclick.contains(l)) {
                     next_exists = true;
-                } else if onclick.contains(&prev_link) {
+                } else if prev_links.iter().any(|l| onclick.contains(l)) {
                     previous_exists = true;
                 }
             }

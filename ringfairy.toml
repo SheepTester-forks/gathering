@@ -1,4 +1,5 @@
 base_url = "https://kytrinh.me/gathering"
+base_url_aliases = ["https://pink10000.github.io/ringfairy/"]
 ring_name = "UCSD Gathering"
 ring_description = "A webring to connect UCSD students."
 ring_owner = "pink10000"
@@ -16,6 +17,7 @@ client_header = "text/html,application/xhtml+xml,application/xml;q=0.9,image/web
 audit_retries_delay = 100
 audit_retries_max = 2
 
+audit = true
 shuffle = false         # Randomizes website sequence when generating
 verbose = false         # Enables verbose logging
 skip_minify = false     # If your generated HTML have issues, or you want hand-editable output, try skip minification

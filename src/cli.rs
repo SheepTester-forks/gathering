@@ -20,6 +20,7 @@ pub struct AppSettings {
     pub path_assets: String,
     pub path_templates: String,
     pub base_url: String,
+    pub base_url_aliases: Vec<String>,
     pub next_url_text: String,
     pub prev_url_text: String,
     pub client_user_agent: String,
@@ -46,13 +47,13 @@ impl Default for AppSettings {
             _filepath_config: "./ringfairy.toml".into(),
             json_lists: Vec::new(),
             toml_lists: Vec::new(),
-            // Default website list file (can be overridden by config or -l/--list)
-            filepath_list: vec!["./websites.toml".to_string()],
+            filepath_list: vec!["./websites.json".to_string()],
             filename_template_redirect: "redirect.html".into(),
             path_output: "./webring".into(),
             path_assets: "./data/assets".into(),
             path_templates: "./data/templates".into(),
             base_url: " ".to_string(),
+            base_url_aliases: Vec::new(),
             next_url_text: "next".to_string(),
             prev_url_text: "previous".to_string(),
             client_user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36".into(),
@@ -85,6 +86,7 @@ pub struct ConfigSettings {
     pub path_assets: Option<String>,
     pub path_templates: Option<String>,
     pub base_url: Option<String>,
+    pub base_url_aliases: Option<Vec<String>>,
     pub next_url_text: Option<String>,
     pub prev_url_text: Option<String>,
     pub client_user_agent: Option<String>,
@@ -191,6 +193,13 @@ pub struct ClapSettings {
         help = "The base URL for the webring. Something like 'https://example.com'"
     )]
     pub base_url: Option<String>,
+
+    #[clap(
+        long = "url-alias",
+        ignore_case = false,
+        help = "Additional base URLs for the webring, used during site audits."
+    )]
+    pub base_url_aliases: Vec<String>,
 
     #[clap(
         long = "next-text",
@@ -349,10 +358,7 @@ async fn merge_configs(cli_args: ClapSettings, config: self::ConfigSettings) -> 
     if let Some(ref cfg_paths) = config.filepath_list {
         de_dupe.extend(cfg_paths.iter().cloned());
     }
-    // Preserve default list file if neither CLI nor config provided any.
-    if !de_dupe.is_empty() {
-        final_settings.filepath_list = de_dupe.into_iter().collect();
-    }
+    final_settings.filepath_list = de_dupe.into_iter().collect();
 
     final_settings.json_lists = {
         let mut v = Vec::new();
@@ -408,6 +414,15 @@ async fn merge_configs(cli_args: ClapSettings, config: self::ConfigSettings) -> 
         .base_url
         .or(config.base_url)
         .unwrap_or(final_settings.base_url);
+
+    final_settings.base_url_aliases = {
+        let mut v = Vec::new();
+        v.extend(cli_args.base_url_aliases);
+        if let Some(c) = config.base_url_aliases {
+            v.extend(c);
+        }
+        v
+    };
 
     final_settings.next_url_text = cli_args
         .next_url_text

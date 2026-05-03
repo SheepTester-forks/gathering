@@ -30,6 +30,7 @@ about = "the internet garden I tend to"
 url = "https://godsped.com/"
 atom = "https://godsped.com/feed.xml"
 owner = "Samir-Rashid"
+
 [[websites]]
 name = "ryanbatubara"
 slug = "ryanbatubara" # determines your url: https://kytrinh.me/gathering/<slug>/next
