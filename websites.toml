@@ -83,3 +83,10 @@ url = "https://macla.ren/"
 atom = "" # optional
 rss = "https://macla.ren/blog/index.xml" # optional
 owner = "molly"
+
+[[websites]]
+name = "broadwell.me"
+slug = "broadwell.me"
+about = "Michael's site"
+url = "https://broadwell.me"
+owner = "broad-well"
